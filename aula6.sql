@@ -134,4 +134,46 @@ select * from media_recursos();
 
 
 -- 7 
-create or replace procedure diagnostico_maquina()
+create or replace procedure diagnostico_maquina(v_id_maquina integer) as $$
+declare
+	v_maquina_harddisk integer;
+	v_software_harddisk integer;
+	v_maquina_Memoria_Ram integer;
+	v_software_Memoria_Ram integer;
+begin
+	select s.HardDisk,
+		   m.HardDisk,
+		   s.Memoria_Ram,
+	       m.Memoria_Ram 
+    into v_software_harddisk, 
+	       v_maquina_harddisk, 
+		   v_software_Memoria_Ram, 
+		   v_maquina_Memoria_Ram
+	from software s
+	join Maquina m on m.Id_Maquina = s.Fk_Maquina
+	where s.Fk_Maquina = v_id_maquina;
+
+	if not found v_id_maquina then
+		raise exception 'Máquina não encontrada!';
+	end if;
+
+	if v_maquina_harddisk < v_software_harddisk and v_maquina_Memoria_Ram < v_software_Memoria_Ram then
+		raise notice 'O computador precisa de mais memoria ram e harddisk';
+	elsif v_maquina_harddisk < v_software_harddisk and v_maquina_Memoria_Ram > v_software_Memoria_Ram then
+		raise notice 'O computador precisa apenas de mais harddisk';
+	elsif v_maquina_harddisk > v_software_harddisk and v_maquina_Memoria_Ram < v_software_Memoria_Ram then
+		raise notice 'O coputador precisa apenas de mais memoria ram';
+	else 
+		raise notice 'o computador não precisa de upgrades';
+	end if;
+end;
+$$ language plpgsql;
+
+
+call diagnostico_maquina(1);
+call diagnostico_maquina(2);
+call diagnostico_maquina(3);
+call diagnostico_maquina(4);
+call diagnostico_maquina(5);
+call diagnostico_maquina(6);
+call diagnostico_maquina(7);
