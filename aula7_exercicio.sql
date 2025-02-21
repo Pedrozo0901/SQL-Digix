@@ -28,3 +28,19 @@ select * from log_maquina;
 
 
 -- 2
+create or replace function trigger_senha_forte()
+returns trigger as $$
+begin
+	if char_length(new.Password) < 6 then
+		raise exception 'ERRO: A senha deve ter pelo menos 6 dígitos';
+	end if;
+	return new;
+end;
+$$ language plpgsql;
+
+create or replace trigger trigger_senha_forte
+before insert on Usuarios
+for each row
+execute function trigger_senha_forte();
+
+insert into Usuarios values (5, '456', 'Felipe', 111, 'TI');
